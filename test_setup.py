@@ -6,12 +6,11 @@ import numpy as np
 
 print("Libraries imported successfully!")
 
-# 1. Load the pre-trained Faster R-CNN model
-# This downloads a model pre-trained on the COCO dataset (includes cars, buses, etc.)
+
 print("Downloading Faster R-CNN model... (this happens only once)")
 model = fasterrcnn_resnet50_fpn(pretrained=True)
 
-# 2. Set the model to evaluation mode (essential for inference)
+
 model.eval()
 
 print("✅ Model loaded successfully!")

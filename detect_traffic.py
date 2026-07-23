@@ -5,11 +5,10 @@ import cv2
 import numpy as np
 import os
 
-# --- STEP 1: FIX THE VIDEO PATH ---
-# Make sure your video is named EXACTLY 'traffic_video.mp4'
+
 video_filename = 'traffic_video.mp4'
 
-# This checks where the script is currently running
+
 current_folder = os.getcwd()
 video_path = os.path.join(current_folder, video_filename)
 
@@ -26,20 +25,19 @@ if not os.path.exists(video_path):
 else:
     print("✅ Video file found! Proceeding...")
 
-# --- STEP 2: LOAD MODEL (Updated to fix warnings) ---
+
 print("Loading model...")
-# New syntax to remove the warnings
+
 weights = FasterRCNN_ResNet50_FPN_Weights.DEFAULT
 model = fasterrcnn_resnet50_fpn(weights=weights)
 model.eval()
 
-# Use GPU if available
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
 print(f"✅ Model loaded on {device}")
 
-# --- STEP 3: PROCESSING ---
-# Classes we care about (Car, Motorcycle, Bus, Truck)
+
 RELEVANT_CLASSES = [3, 4, 6, 8]
 COCO_INSTANCE_CATEGORY_NAMES = [
     '__background__', 'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
@@ -61,7 +59,7 @@ width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 fps = int(cap.get(cv2.CAP_PROP_FPS))
 
-# Save output
+
 out = cv2.VideoWriter('output_traffic.avi', cv2.VideoWriter_fourcc(*'MJPG'), fps, (width, height))
 
 print("Processing video... Press 'q' to stop early.")
@@ -88,11 +86,11 @@ while cap.isOpened():
             x1, y1, x2, y2 = boxes[i].astype(int)
             class_name = COCO_INSTANCE_CATEGORY_NAMES[labels[i]]
             
-            # Draw Green Box
+       
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
             vehicle_count += 1
 
-    # Display Count
+ 
     cv2.putText(frame, f"Vehicles: {vehicle_count}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 3)
 
     cv2.imshow('Traffic Detection', frame)

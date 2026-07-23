@@ -1,11 +1,11 @@
 import os
 import xml.etree.ElementTree as ET
 
-# --- CONFIGURATION ---
-xml_folder = "train_data/annotations" # Where your old XMLs are
-output_folder = "train_data/yolo_labels" # Where the new TXTs will go
 
-# Notice we dropped 'background' and started at 0
+xml_folder = "train_data/annotations" 
+output_folder = "train_data/yolo_labels" 
+
+
 classes = {'car': 0, 'bus': 1, 'bike': 2, 'ambulance': 3}
 
 if not os.path.exists(output_folder):
@@ -35,7 +35,7 @@ for xml_file in os.listdir(xml_folder):
     tree = ET.parse(os.path.join(xml_folder, xml_file))
     root = tree.getroot()
     
-    # Get image dimensions
+
     size = root.find('size')
     w = int(size.find('width').text)
     h = int(size.find('height').text)

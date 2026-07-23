@@ -1,0 +1,7 @@
+Model Architecture,Accuracy,Precision,Recall,F1 Score,Primary Trait
+YOLOv8 (Custom Edge Model),0.92,0.93,0.90,0.91,Optimal Edge Deployment
+Faster R-CNN (ResNet50),0.94,0.91,0.95,0.93,High Acc / Low Speed
+YOLOv7,0.91,0.92,0.89,0.90,Strong Baseline
+YOLOv5s,0.89,0.88,0.87,0.87,Legacy Real-Time
+EfficientDet-D0,0.86,0.87,0.85,0.86,Resource Efficient
+SSD MobileNet V2,0.82,0.84,0.80,0.82,Ultra-Fast / Low Acc

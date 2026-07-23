@@ -1,0 +1,17 @@
+venv/
+traffic_videos/
+traffic_dataset/
+traffic_dataset1/
+train_data/
+new_train_images/
+new_yolo_labels/
+runs/
+testing_folder/
+uploads/
+*.pt
+*.pth
+tf1
+tf2
+__pycache__/
+*.mp4
+*.avi

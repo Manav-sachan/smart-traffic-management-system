@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart City Intersection Dashboard</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #12121e; color: white; margin: 0; padding: 20px; text-align: center; }
+        h1 { color: #00d2ff; letter-spacing: 2px; }
+        .grid-container { display: flex; justify-content: center; gap: 30px; margin-top: 20px; flex-wrap: wrap; }
+        .feed-card { background: #2a2a40; padding: 20px; border-radius: 12px; width: 600px; box-shadow: 0px 10px 20px rgba(0,0,0,0.5); }
+        .feed-card h2 { margin-top: 0; color: #ffae00; }
+        .video-container { border: 3px solid #3a3a50; border-radius: 8px; overflow: hidden; background: #000; height: 450px; margin-bottom: 15px; }
+        img { width: 100%; height: 100%; object-fit: cover; }
+        .controls { display: flex; flex-direction: column; gap: 10px; }
+        .row { display: flex; justify-content: space-between; align-items: center; }
+        .btn { background: #00d2ff; color: #000; padding: 8px 15px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; text-decoration: none; }
+        .btn:hover { background: #0099cc; }
+        .btn-live { background: #ff4757; color: white; }
+        .btn-live:hover { background: #ff6b81; }
+        input[type="file"] { background: #1e1e2f; padding: 5px; border-radius: 5px; color: white; }
+    </style>
+</head>
+<body>
+
+    <h1>🚦 SMART CITY INTERSECTION DASHBOARD</h1>
+
+    <div class="grid-container">
+        
+        <div class="feed-card">
+            <h2>📍 North/South Intersection</h2>
+            <div class="video-container">
+                <img src="{{ url_for('video_feed', feed_id='feed1') }}" alt="Feed 1">
+            </div>
+            <div class="controls">
+                <div class="row">
+                    <a href="/set_live/feed1/0" class="btn btn-live">🔴 Use Laptop Webcam</a>
+                </div>
+                <div class="row">
+                    <form action="/upload/feed1" method="post" enctype="multipart/form-data">
+                        <input type="file" name="file" accept="video/mp4, video/avi">
+                        <button type="submit" class="btn">Upload Traffic Video</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="feed-card">
+            <h2>📍 East/West Intersection</h2>
+            <div class="video-container">
+                <img src="{{ url_for('video_feed', feed_id='feed2') }}" alt="Feed 2">
+            </div>
+            <div class="controls">
+                <div class="row">
+                    <a href="/set_live/feed2/1" class="btn btn-live">🔴 Use USB Webcam</a>
+                </div>
+                <div class="row">
+                    <form action="/upload/feed2" method="post" enctype="multipart/form-data">
+                        <input type="file" name="file" accept="video/mp4, video/avi">
+                        <button type="submit" class="btn">Upload Traffic Video</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

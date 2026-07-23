@@ -5,27 +5,23 @@ from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from PIL import Image
 import os
 
-# --- CONFIGURATION ---
-model_path = "traffic_model.pth"        # Your trained Faster R-CNN model
-images_folder = "new_train_images"      # Folder containing your 1987 extracted frames
-output_labels_folder = "new_yolo_labels"# Folder where the new .txt files will go
-confidence_threshold = 0.6              # Only save boxes the AI is 60%+ sure about
 
-# --- CLASS MAPPING ---
-# Faster R-CNN uses 1-based indexing (0 is background). 
-# YOLO uses 0-based indexing (no background). We must shift them down.
-# FRCNN: 1=car, 2=bus, 3=bike, 4=ambulance
-# YOLO:  0=car, 1=bus, 2=bike, 3=ambulance
+model_path = "traffic_model.pth"       
+images_folder = "new_train_images"     
+output_labels_folder = "new_yolo_labels"
+confidence_threshold = 0.6             
+
+
 class_map = {1: 0, 2: 1, 3: 2, 4: 3}
 
-# Create output folder if it doesn't exist
+
 if not os.path.exists(output_labels_folder):
     os.makedirs(output_labels_folder)
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 print(f"Loading AI on: {device}")
 
-# --- LOAD MODEL ---
+
 def get_model(num_classes):
     weights = FasterRCNN_ResNet50_FPN_Weights.DEFAULT
     model = fasterrcnn_resnet50_fpn(weights=weights)
@@ -33,13 +29,13 @@ def get_model(num_classes):
     model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
     return model
 
-# 5 classes: background(0) + car(1) + bus(2) + bike(3) + ambulance(4)
+
 model = get_model(5) 
 model.load_state_dict(torch.load(model_path, map_location=device))
 model.to(device)
 model.eval()
 
-# --- AUTO-ANNOTATION LOOP ---
+
 image_files = [f for f in os.listdir(images_folder) if f.endswith('.jpg')]
 print(f"Starting auto-annotation for {len(image_files)} images...")
 print("-" * 50)
@@ -49,7 +45,7 @@ total_boxes_drawn = 0
 for img_name in image_files:
     img_path = os.path.join(images_folder, img_name)
     
-    # Load image and get dimensions for YOLO normalization
+    
     img = Image.open(img_path).convert("RGB")
     img_width, img_height = img.size
     
@@ -65,28 +61,28 @@ for img_name in image_files:
     txt_name = img_name.replace('.jpg', '.txt')
     txt_path = os.path.join(output_labels_folder, txt_name)
     
-    # Write YOLO formatted text file
+ 
     with open(txt_path, 'w') as f:
         for i in range(len(boxes)):
             if scores[i] >= confidence_threshold:
                 frcnn_label = labels[i]
                 
-                # Skip if it's a label we don't care about
+               
                 if frcnn_label not in class_map:
                     continue
                     
                 yolo_label = class_map[frcnn_label]
                 
-                # Faster R-CNN gives [xmin, ymin, xmax, ymax]
+            
                 x1, y1, x2, y2 = boxes[i]
                 
-                # Math to convert to YOLO [x_center, y_center, width, height]
+               
                 x_center = ((x1 + x2) / 2.0) / img_width
                 y_center = ((y1 + y2) / 2.0) / img_height
                 width = (x2 - x1) / img_width
                 height = (y2 - y1) / img_height
                 
-                # Ensure values don't accidentally exceed bounds
+              
                 x_center, y_center = max(0, min(1, x_center)), max(0, min(1, y_center))
                 width, height = max(0, min(1, width)), max(0, min(1, height))
                 

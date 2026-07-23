@@ -8,15 +8,15 @@ from PIL import Image
 import xml.etree.ElementTree as ET
 import numpy as np
 
-# --- CONFIGURATION ---
-weights_path = "traffic_model.pth"  # Your trained model
+
+weights_path = "traffic_model.pth"  
 imgs_path = r"train_data/images"
 xmls_path = r"train_data/annotations"
 
-# Must match training
+
 class_dict = {'background': 0, 'car': 1, 'bus': 2, 'bike': 3, 'ambulance': 4}
 
-# --- HELPER FUNCTIONS ---
+
 def get_model(num_classes):
     weights = FasterRCNN_ResNet50_FPN_Weights.DEFAULT
     model = fasterrcnn_resnet50_fpn(weights=weights)
@@ -42,11 +42,11 @@ def get_ground_truth(xml_path):
                 labels.append(class_dict[name])
     return torch.tensor(boxes, dtype=torch.float32), torch.tensor(labels, dtype=torch.int64)
 
-# --- MAIN EVALUATION ---
+
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 print(f"Evaluating on: {device}")
 
-# 1. Load Model
+
 if not os.path.exists(weights_path):
     print("❌ ERROR: 'traffic_model.pth' not found. Run training first!")
     exit()
@@ -57,7 +57,7 @@ model.load_state_dict(torch.load(weights_path, map_location=device))
 model.to(device)
 model.eval()
 
-# 2. Loop through all images
+
 image_files = [f for f in os.listdir(imgs_path) if f.endswith('.jpg')]
 total_correct_predictions = 0
 total_actual_vehicles = 0
@@ -67,43 +67,42 @@ print("Checking accuracy on labeled images...")
 print("-" * 50)
 
 for img_file in image_files:
-    # Load Image
+  
     img_path = os.path.join(imgs_path, img_file)
     xml_path = os.path.join(xmls_path, img_file.replace('.jpg', '.xml'))
     
     img = Image.open(img_path).convert("RGB")
     img_tensor = torchvision.transforms.functional.to_tensor(img).to(device)
     
-    # Get Ground Truth (Your Labels)
+   
     gt_boxes, gt_labels = get_ground_truth(xml_path)
     
     if len(gt_boxes) == 0:
-        continue # Skip images with no vehicles
+        continue 
         
     gt_boxes = gt_boxes.to(device)
     total_actual_vehicles += len(gt_boxes)
 
-    # Get Predictions (Model's Guess)
+   
     with torch.no_grad():
         prediction = model([img_tensor])[0]
     
     pred_boxes = prediction['boxes']
     pred_scores = prediction['scores']
     
-    # Filter predictions (Only keep confident guesses > 50%)
+   
     keep = pred_scores > 0.5
     pred_boxes = pred_boxes[keep]
     
     if len(pred_boxes) > 0:
-        # Calculate Overlap (IoU)
+        
         ious = box_iou(gt_boxes, pred_boxes)
         
-        # For each ground truth box, did we find a matching prediction?
-        # We check if the maximum overlap is greater than 0.5 (50%)
+     
         matches = (ious.max(dim=1)[0] > 0.5).sum().item()
         total_correct_predictions += matches
 
-# 3. Final Calculation
+
 accuracy = (total_correct_predictions / total_actual_vehicles) * 100
 
 print("-" * 50)

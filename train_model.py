@@ -7,7 +7,7 @@ from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from PIL import Image
 import xml.etree.ElementTree as ET
 
-# --- CONFIGURATION ---
+
 imgs_path = r"train_data/images"
 xmls_path = r"train_data/annotations"
 
@@ -18,8 +18,7 @@ class_dict = {
     'bike': 3,
     'ambulance': 4
 }
-# Helmet Eye - Smart Traffic Management System
-# --- CUSTOM DATASET CLASS ---
+
 class TrafficDataset(torch.utils.data.Dataset):
     def __init__(self, imgs_path, xmls_path, class_dict, transforms=None):
         self.imgs_path = imgs_path
@@ -35,11 +34,11 @@ class TrafficDataset(torch.utils.data.Dataset):
             xml_file = img_file.replace('.jpg', '.xml')
             xml_full_path = os.path.join(self.xmls_path, xml_file)
             
-            # Check if XML exists
+           
             if not os.path.exists(xml_full_path):
                 continue
             
-            # Check if XML actually has boxes inside
+           
             try:
                 tree = ET.parse(xml_full_path)
                 root = tree.getroot()
@@ -77,14 +76,14 @@ class TrafficDataset(torch.utils.data.Dataset):
                     xmax = float(bndbox.find('xmax').text)
                     ymax = float(bndbox.find('ymax').text)
                     
-                    # Safety check: Prevent negative or zero-width boxes
+                 
                     if xmax > xmin and ymax > ymin:
                         boxes.append([xmin, ymin, xmax, ymax])
                         labels.append(label)
         except:
-            pass # Skip corrupted XMLs
+            pass
         
-        # If no valid boxes found, return None (We will filter this out in collate_fn)
+      
         if len(boxes) == 0:
             return None
             
@@ -104,15 +103,14 @@ class TrafficDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.imgs)
 
-# --- HELPER: SAFE COLLATE FUNCTION ---
-# This function removes any "None" items from the batch (images with bad boxes)
+
 def collate_fn(batch):
     batch = [item for item in batch if item is not None]
     if len(batch) == 0:
         return None 
     return tuple(zip(*batch))
 
-# --- MAIN TRAINING LOOP ---
+
 if __name__ == '__main__':
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     print(f"Training on: {device}")
@@ -131,7 +129,7 @@ if __name__ == '__main__':
 
     num_classes = len(class_dict)
     
-    # Load Model
+   
     weights = FasterRCNN_ResNet50_FPN_Weights.DEFAULT
     model = fasterrcnn_resnet50_fpn(weights=weights)
     in_features = model.roi_heads.box_predictor.cls_score.in_features
@@ -151,7 +149,7 @@ if __name__ == '__main__':
         batch_count = 0
         
         for i, batch in enumerate(data_loader):
-            # Skip empty batches (caused by the collate_fn filtering bad images)
+          
             if batch is None:
                 continue
                 
@@ -159,7 +157,7 @@ if __name__ == '__main__':
             images = list(image.to(device) for image in images)
             targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
-            # Standard Training Step
+           
             loss_dict = model(images, targets)
             losses = sum(loss for loss in loss_dict.values())
 
